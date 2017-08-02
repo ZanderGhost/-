@@ -33,21 +33,16 @@ list_friends = requests.get(VK_API + 'friends.get', params).json()['response']['
 
 groups = requests.get(VK_API + 'groups.get', params).json()['response']['items']
 
-def get_group_members(group_id):
-    params1 = {
-        'access_token': token,
-        'v': VERSION,
-        'group_id': group_id,
-    }
-
-    return requests.get(VK_API + 'groups.getMembers', params1).json()['response']['items']
+def get_members(group_id):
+    params['group_id'] = group_id
+    return requests.get(VK_API + 'groups.getMembers', params).json()['response']['items']
 
 without_friends_group = []
 
 for group in groups:
-    list_members = get_group_members(group['id'])
+    list_members = get_members(group['id'])
     if len(set(list_friends) & set(list_members)) == 0:
-        without_friends_group.append({'name': group['name'].decode('utf-8'), 'gid': group['id'],
+        without_friends_group.append({'name': group['name'], 'gid': group['id'],
         'members_count': len(list_members)})
 
     print('-', end='', flush=True)
@@ -55,7 +50,7 @@ for group in groups:
 
 def write_file(dict_group):
     with open('vk_groups.json', 'w') as f:
-        json.dump(dict_group, f)
+        json.dump(dict_group, f, indent=2, ensure_ascii=False)
         print('ok')
 
 write_file(without_friends_group)
